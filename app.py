@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import joblib
+import os
 
 # Must be the first streamlit command
 st.set_page_config(page_title="IPL Match Analysis & Predictor", page_icon="🏏", layout="wide")
@@ -20,6 +21,10 @@ def load_data():
 @st.cache_resource
 def load_models():
     try:
+        if not os.path.exists('models/winner_model.pkl'):
+            print("Models not found. Training models now...")
+            os.system('python train_models.py')
+            
         model = joblib.load('models/winner_model.pkl')
         le_venue = joblib.load('models/le_venue.pkl')
         le_team = joblib.load('models/le_team.pkl')
@@ -27,6 +32,7 @@ def load_models():
         team_stats = joblib.load('models/team_stats.pkl')
         return model, le_venue, le_team, le_toss_decision, team_stats
     except Exception as e:
+        st.error(f"Error loading models: {e}")
         return None, None, None, None, None
 
 matches_df, points_df = load_data()
